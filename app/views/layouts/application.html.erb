@@ -27,8 +27,20 @@
     <% if cookies[:theme] == "dark" %>
       <%= stylesheet_link_tag 'dark-mode', media: 'all' %>
     <% end %>
+    <% if Rails.env.production? %>
+      <script type='text/javascript'>
+        window.SENTRY_DSN = "<%= ENV['SENTRY_DSN'] %>"
+        window.currentUserLoggedIn = "<%= user_signed_in? %>"
 
-    <%= javascript_pack_tag 'application', defer: true %>
+        <% if defined?(current_user) && current_user.present? %>
+          window.currentUserId = "<%= current_user.id %>"
+          window.currentUserEmail = "<%= current_user.email %>"
+        <% end %>
+      </script>
+      <%= javascript_pack_tag 'application', 'error_tracking', defer: true %>
+    <% else %>
+      <%= javascript_pack_tag 'application', defer: true %>
+    <% end %>
   </head>
 
   <body class="line-numbers h-full">
@@ -38,6 +50,5 @@
     <%= render 'shared/footer' %>
     <%= render 'shared/sidecar' %>
     <%= render 'shared/ga' %>
-    <%= render 'layouts/error_tracking' %>
   </body>
 </html>
